@@ -25,15 +25,15 @@ def insert_data(db, data):
 
 
 def main(auth_file, config_file, input_file):
-	with json.load(open(auth_file, 'r')) as auth:
-		authenticate(auth)
+	with open(auth_file, 'r') as auth:
+		authenticate(json.load(auth))
 
 		db = MongoClient().covidTracker
-		with json.load(open(input_file, 'r')) as input_data:
-			insert_data(db, input_data)
+		with open(input_file, 'r') as input_data:
+			insert_data(db, json.load(input_data))
 
-		with json.load(open(config_file, 'r')) as config:
-			result = query_from_config(db, config)
+		with open(config_file, 'r') as config:
+			result = query_from_config(db, json.load(config))
 			print(result)
 
 

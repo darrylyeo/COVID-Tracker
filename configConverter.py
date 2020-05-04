@@ -8,11 +8,9 @@ import datetime
 from pymongo import MongoClient
 
 
-# Format date to match integer format
-# e.g. April 1 -> 20200401
-def format_date(date):
-	# if type(date) == str:
-	# 	date = datetime.date(date)
+# Format date to match integer format in the dataset
+# e.g. April 1, 2020 -> 20200401
+def format_date(date) -> int:
 	if type(date) == datetime.date:
 		date = int(str(date.year) + str(date.month) + str(date.day))
 	return date
@@ -22,34 +20,36 @@ def format_date(date):
 def query_from_config(db, config):
 	today = datetime.date.today()
 
-	return db[config.collection].aggregate(
-		# Filter
+	return db[config["collection"]].aggregate(
+		# Filter by target
 		{ "$match": {
-			[config.aggregation]:
-				{ "$in": config.target }
-					if type(config.target) == list else
-				config.target
-		} },
+			config["aggregation"]:
+				{ "$in": config["target"] }
+					if type(config["target"]) is list else
+				config["target"]
+		} }
+			if "target" in config else
+		{},
 
 		# Filter by date range
 		{ "$match": { "date": {
 			"$gte": format_date(
-				config.time.start if config.time.start else
-				datetime.date(today.year, 1, 1) if config.time == "year" else
-				datetime.date(today.year, today.month, 1) if config.time == "month" else
-				today - datetime.timedelta(days=today.weekday()) if config.time == "week" else
+				config["time"]["start"] if "start" in config["time"] else
+				datetime.date(today.year, 1, 1) if config["time"] == "year" else
+				datetime.date(today.year, today.month, 1) if config["time"] == "month" else
+				today - datetime.timedelta(days=today.weekday()) if config["time"] == "week" else
 				0
 			),
 			
 			"$lte": format_date(
-				config.time.end if config.time.end else
-				today if config.time == "year" else
-				today if config.time == "month" else
-				today if config.time == "week" else
-				0
+				config["time"]["end"] if "end" in config["time"] else
+				today if config["time"] == "year" else
+				today if config["time"] == "month" else
+				today if config["time"] == "week" else
+				30000101
 			)
 		} } }
-			if config.time else
+			if "time" in config else
 		{},
 
 		# Project
@@ -60,6 +60,6 @@ def query_from_config(db, config):
 
 		# Group for analysis
 		# { "$group": {
-		# 	"_id": config.analysis.
+		# 	"_id": config["analysis"].
 		# } }
 	)
