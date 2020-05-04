@@ -5,24 +5,36 @@
 
 
 import argparse
+import json
+from pymongo import MongoClient
+
 from configConverter import *
 from htmlGenerator import *
 
 
-# Function that handles MongoDB auth, given auth file
-def authenticate(auth_file):
+# Function that handles MongoDB auth, given auth config
+def authenticate(auth):
 	pass
 
 
 # Function that takes data from Covid Tracking API & NY Times Dataset, 
 # and puts it in MongoDB collections: covid & states
-def insert_data():
-	pass
+def insert_data(db, data):
+	db.covid.insertMany(data)
+	# db.states.insertMany(data)
 
 
-def main(auth_file, config_file):
-	authenticate(auth_file)
-	insert_data()
+def main(auth_file, config_file, input_file):
+	with json.load(open(auth_file, 'r')) as auth:
+		authenticate(auth)
+
+		db = MongoClient().covidTracker
+		with json.load(open(input_file, 'r')) as input_data:
+			insert_data(db, input_data)
+
+		with json.load(open(config_file, 'r')) as config:
+			result = query_from_config(db, config)
+			print(result)
 
 
 if __name__ == '__main__':
@@ -41,4 +53,4 @@ if __name__ == '__main__':
 	)
 	args = parser.parse_args()
 
-	main(args.auth, args.config)
+	main(args.auth, args.config, "daily.json")
