@@ -16,27 +16,32 @@ def format_date(date):
 	return date
 
 # TODO: (Case 2) Both collections present, but refresh flag True in config file
-def refresh_collections(db):
-    pass
+def refresh_collections(db, covid_file, states_file):
+        with open(covid_file, 'r') as input_data:
+                db.covid.insert_many(json.load(input_data))
+   
+        with open(states_file, 'r') as input_data:
+                db.states.insert_many(json.load(input_data))
+
 
 # Function that given a config file, returns all query results
-def get_results(db, config):
+def get_results(db, config, covid_data_file, states_data_file):
         result = []
     
         # Refresh check
         if config["refresh"] == 'true':
-                refresh_collections(db)
+                refresh_collections(db, covid_data_file, states_data_file)
    
         # Aggregation checks
         if (config["collection"] == "states" and 
                 (config["aggregation"] == "usa" or 
                  config["aggregation"] == "fiftyStates")):
-                pass
-                #Throw error
+                print("Cannot aggregate over \'usa\' or \'fiftyStates\' if collection is '\states\'")
+                exit(1)
         elif (config["collection"] == "covid" and
                  config["aggregation"] == "county"):
-                pass 
-                # Throw error
+                print("Cannot aggregate over \'county\' if collection is '\covid\'")
+                exit(1)
 
         today = datetime.date.today()
 
