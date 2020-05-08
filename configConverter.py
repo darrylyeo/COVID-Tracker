@@ -99,26 +99,21 @@ def query_from_config(db, config, task):
 		}
 
 	# Construct projection dictionary
-	project_stage = (
-		{
-			"_id": 0,
-			task["track"]: 1,
-			"date": 1,
-			"state": 1
+	project_stage = {
+		"_id": 0,
+		"date": 1,
+		"state": 1
+	}
+	project_stage += {
+		task["track"]: 1
+	} if "track" in task else {
+		task.keys()[0]: {
+			"$divide": [
+				task["ratio"]["numerator"],
+				task["ratio"]["denominator"]
+			]
 		}
-			if "track" in task else
-		{
-			"_id": 0,
-			task.keys()[0]: {
-				"$divide": [
-					task["ratio"]["numerator"],
-					task["ratio"]["denominator"]
-				]
-			},
-			"date": 1,
-			"state": 1
-		}
-	)
+	}
 
 	# Construct & return MongoDB query
 	return db.config["collection"].aggregate([
