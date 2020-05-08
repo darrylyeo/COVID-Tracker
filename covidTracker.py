@@ -3,9 +3,7 @@
 # Lab 4 - CSC 369 Spring 2020
 # covidTracker: an analytical tool for tracking COVID spread in the US
 
-import argparse
-import json
-import csv
+import argparse, csv, json
 from pymongo import MongoClient
 
 from configConverter import *
@@ -62,7 +60,7 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			# Results is a list of query results
 			# where each query result is a list of json objects
 			results = get_results(db, json.load(config), covid_data_file, states_data_file)
-			
+
 			for i, result in results.enumerate():
 				print('Query', i, 'Results:', result, '\n')
 

@@ -4,7 +4,7 @@
 # configConverter: converts input config file into a MongoDB query
 
 
-import datetime
+import datetime, json
 from pymongo import MongoClient
 
 
