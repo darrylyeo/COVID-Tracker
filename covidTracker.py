@@ -38,29 +38,32 @@ def json_from_csv(csv_file):
 
 
 # Function that takes data from Covid Tracking API & NY Times Dataset,
-# and puts it in MongoDB collections if necessary: covid & states
-def data_fill_check(db, covid_data_file, states_data_file):
-	if db.covid.find().count() == 0:
-		with open(covid_data_file, 'r') as input_data:
-			db.covid.insert_many(json.load(input_data))
+# and imports into MongoDB collections if necessary: covid & states
+def load_data(db, collection, data_file, refresh=False):
+	if refresh:
+		db[collection].delete({})
 
-	if db.states.find().count() == 0:
-		with open(states_data_file, 'r') as input_data:
-			db.states.insert_many(json_from_csv(input_data))
+	if db[collection].find().count() == 0 or refresh:
+		with open(data_file, 'r') as data:
+			db[collection].insert_many(json.load(data))
 
 
 def main(auth_file, config_file, covid_data_file, states_data_file):
 	with open(auth_file, 'r') as auth:
 		db = authenticate_db(json.load(auth))
 
-		# Check to see if collections exist, fill if not
-		data_fill_check(db, covid_data_file, states_data_file)
+		with open(config_file, 'r') as config_json:
+			config = json.load(config_json)
 
-		with open(config_file, 'r') as config:
+			# Load data if necessary
+			load_data(db, "covid", covid_data_file, refresh=config["refresh"])
+			load_data(db, "states", states_data_file, refresh=config["refresh"])
+
 			# Results is a list of query results
 			# where each query result is a list of json objects
-			results = get_results(db, json.load(config), covid_data_file, states_data_file)
+			results = get_results(db, config)
 
+			# Print results
 			for i, result in results.enumerate():
 				print('Query', i, 'Results:', result, '\n')
 

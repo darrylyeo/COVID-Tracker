@@ -16,21 +16,8 @@ def format_date(date):
 	return date
 
 
-# TODO: (Case 2) Both collections present, but refresh flag True in config file
-def refresh_collections(db, covid_file, states_file):
-	with open(covid_file, 'r') as input_data:
-		db.covid.insert_many(json.load(input_data))
-
-	with open(states_file, 'r') as input_data:
-		db.states.insert_many(json.load(input_data))
-
-
 # Function that given a config file, returns all query results
-def get_results(db, config, covid_data_file, states_data_file):
-	# Refresh check
-	if config["refresh"] == 'true':
-		refresh_collections(db, covid_data_file, states_data_file)
-
+def get_results(db, config):
 	# Aggregation checks
 	if (
 		config["collection"] == "states" and
