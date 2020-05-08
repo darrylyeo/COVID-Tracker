@@ -92,14 +92,12 @@ def query_from_config(db, config, task):
 		}
 	if "stats" in task:
 		# Load dictionary with items with number that can't be predetermined
-		group_dict = {
-			"$group": {
-				"avg" + stat: {"$avg": stat}
-				for stat in task["stats"]
-			} + {
-				"std" + stat: {"$stdDevPop": stat}
-				for stat in task["stats"]
-			}
+		group_dict["$group"] += {
+			"avg" + stat: {"$avg": stat}
+			for stat in task["stats"]
+		} + {
+			"std" + stat: {"$stdDevPop": stat}
+			for stat in task["stats"]
 		}
 
 	# Construct projection dictionary
