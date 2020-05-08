@@ -38,20 +38,21 @@ def get_results(db, config, covid_data_file, states_data_file):
 	):
 		print("Cannot aggregate over 'usa' or 'fiftyStates' if collection is 'states'")
 		exit(1)
-	elif config["collection"] == "covid" and config["aggregation"] == "county":
+	
+	if config["collection"] == "covid" and config["aggregation"] == "county":
 		print("Cannot aggregate over 'county' if collection is 'covid'")
 		exit(1)
 
 
 	# Perform each query as specified in Analysis attribute
 	return [
-		list(query_from_config(db, config, i))
-		for i in range(len(config["analysis"]))
+		list(query_from_config(db, config, task["task"]))
+		for task in config["analysis"]
 	]
 
 
 # Function that takes in config file JSON, and converts it into query
-def query_from_config(db, config, query_index):
+def query_from_config(db, config, task):
 	today = datetime.date.today()
 
 	# Construct grouping dictionary
@@ -59,11 +60,11 @@ def query_from_config(db, config, query_index):
 		group_dict = {
 			"_id": "$date" if config["aggregation"] == "usa" else 1,
 			(
-				"s" + config["analysis"][query_index]["task"]["track"]
-					if config["analysis"][query_index]["task"].keys()[0] == "track" else
-				config["analysis"][query_index]["task"].keys()[0]
+				"s" + task["track"]
+					if "track" in task else
+				task.keys()[0]
 			): {
-				"$sum": config["analysis"][query_index]["task"]["track"]
+				"$sum": task["track"]
 			}
 		}
 	else:
@@ -71,7 +72,7 @@ def query_from_config(db, config, query_index):
 			"$group": {
 				"_id": (
 					config["aggregation"]
-						if (config["aggregation"] == "state" and config["target"] is list) else
+						if config["aggregation"] == "state" and config["target"] is list else
 					"$date"
 						if config["aggregation"] == "usa" else
 					config["target"] # If config["aggregation"] == "state"
@@ -79,28 +80,34 @@ def query_from_config(db, config, query_index):
 				# Aggregate fields are hardcoded - may contain garbage if not applicable
 				"array": {
 					"$push": (
-						config["analysis"][query_index]["task"]["track"]
-							if config["analysis"][query_index]["task"].keys()[0] == "track" else
-						config["analysis"][query_index]["task"].keys()[0]
+						task["track"]
+							if "track" in task else
+						task.keys()[0]
 					)
 				},
 				"dateArray": {"$push": "$date"},
-			# Example - attributes can be made by:
-			# json1['analysis'][0]['task'].keys()[0] + 'shmee'
+				# Example - attributes can be made by:
+				# json1['analysis'][0]['task'].keys()[0] + 'shmee'
 			}
 		}
-	if config["analysis"][query_index]["task"].keys()[0] == "stats":
+	if "stats" in task:
 		# Load dictionary with items with number that can't be predetermined
-		for stat in config["analysis"][query_index]["task"]["stats"]:
-			group_dict["$group"]["avg" + stat] = {"$avg": stat}
-			group_dict["$group"]["std" + stat] = {"$stdDevPop": stat}
+		group_dict = {
+			"$group": {
+				"avg" + stat: {"$avg": stat}
+				for stat in task["stats"]
+			} + {
+				"std" + stat: {"$stdDevPop": stat}
+				for stat in task["stats"]
+			}
+		}
 
 	# Construct projection dictionary
-	if config["analysis"][query_index]["task"].keys()[0] == "track":
+	if "track" in task:
 		project_dict = {
 			"$project": {
 				"_id": 0,
-				config["analysis"][query_index]["task"]["track"]: 1,
+				task["track"]: 1,
 				"date": 1,
 				"state": 1
 			}
@@ -109,11 +116,12 @@ def query_from_config(db, config, query_index):
 		project_dict = {
 			"$project": {
 				"_id": 0,
-				config["analysis"][query_index]["task"].keys()[0]:
-				{"$divide": [
-					config["analysis"][query_index]["task"]["ratio"]["numerator"],
-					config["analysis"][query_index]["task"]["ratio"]["denominator"]
-				]},
+				task.keys()[0]: {
+					"$divide": [
+						task["ratio"]["numerator"],
+						task["ratio"]["denominator"]
+					]
+				},
 				"date": 1,
 				"state": 1
 			}
@@ -171,7 +179,7 @@ def query_from_config(db, config, query_index):
 
 		# Project
 		project_dict
-			if config["analysis"][query_index]["task"].keys()[0] != "stats" else
+			if "stats" not in task else
 		{},
 
 		# Sort
