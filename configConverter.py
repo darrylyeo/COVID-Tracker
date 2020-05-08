@@ -15,6 +15,7 @@ def format_date(date):
 		date = int(str(date.year) + str(date.month) + str(date.day))
 	return date
 
+
 # TODO: (Case 2) Both collections present, but refresh flag True in config file
 def refresh_collections(db, covid_file, states_file):
 	with open(covid_file, 'r') as input_data:
@@ -26,34 +27,33 @@ def refresh_collections(db, covid_file, states_file):
 
 # Function that given a config file, returns all query results
 def get_results(db, config, covid_data_file, states_data_file):
-	result = []
-
 	# Refresh check
 	if config["refresh"] == 'true':
 		refresh_collections(db, covid_data_file, states_data_file)
 
 	# Aggregation checks
-	if (config["collection"] == "states" and
-		(config["aggregation"] == "usa" or
-		 config["aggregation"] == "fiftyStates")):
-		print("Cannot aggregate over \'usa\' or \'fiftyStates\' if collection is '\states\'")
+	if (
+		config["collection"] == "states" and
+		(config["aggregation"] == "usa" or config["aggregation"] == "fiftyStates")
+	):
+		print("Cannot aggregate over 'usa' or 'fiftyStates' if collection is 'states'")
 		exit(1)
-	elif (config["collection"] == "covid" and
-		 config["aggregation"] == "county"):
-		print("Cannot aggregate over \'county\' if collection is '\covid\'")
+	elif config["collection"] == "covid" and config["aggregation"] == "county":
+		print("Cannot aggregate over 'county' if collection is 'covid'")
 		exit(1)
 
-	today = datetime.date.today()
 
 	# Perform each query as specified in Analysis attribute
-	for i in range(len(config["analysis"])):
-		result.append(list(query_from_config(db, config, i)))
-
-	return result
+	return [
+		list(query_from_config(db, config, i))
+		for i in range(len(config["analysis"]))
+	]
 
 
 # Function that takes in config file JSON, and converts it into query
 def query_from_config(db, config, query_index):
+	today = datetime.date.today()
+
 	# Construct grouping dictionary
 	if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa":
 		group_dict = {

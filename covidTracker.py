@@ -6,7 +6,6 @@
 import argparse
 import json
 import csv
-import pymongo as pm
 from pymongo import MongoClient
 
 from configConverter import *
@@ -26,20 +25,18 @@ def authenticate_db(auth):
 	)[auth["db"]]
 
 
-def prep_csv(csv_fp):
-	data = list(csv.DictReader(csv_fp))
-	data = [
+def json_from_csv(csv_file):
+	return [
 		{
-			u"deaths": int(obj["deaths"]),
-			u"county": unicode(obj["county"], "utf-8"),
-			u"state": unicode(obj["state"], "utf-8"),
-			u"fips": unicode(obj["fips"], "utf-8"),
-			u"date": int(obj["date"].replace('-', '')),
-			u"cases": int(obj["cases"])
+			"deaths": int(obj["deaths"]),
+			"county": unicode(obj["county"], "utf-8"),
+			"state": unicode(obj["state"], "utf-8"),
+			"fips": unicode(obj["fips"], "utf-8"),
+			"date": int(obj["date"].replace('-', '')),
+			"cases": int(obj["cases"])
 		}
-		for obj in data
+		for obj in list(csv.DictReader(csv_file))
 	]
-	return data
 
 
 # Function that takes data from Covid Tracking API & NY Times Dataset,
@@ -51,7 +48,7 @@ def data_fill_check(db, covid_data_file, states_data_file):
 
 	if db.states.find().count() == 0:
 		with open(states_data_file, 'r') as input_data:
-			db.states.insert_many(prep_csv(input_data))
+			db.states.insert_many(json_from_csv(input_data))
 
 
 def main(auth_file, config_file, covid_data_file, states_data_file):
@@ -65,9 +62,9 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			# Results is a list of query results
 			# where each query result is a list of json objects
 			results = get_results(db, json.load(config), covid_data_file, states_data_file)
-			for i in range(len(results)):
-				print('Query', i, 'Results:')
-				print(result[i], '\n')
+			
+			for i, result in results.enumerate():
+				print('Query', i, 'Results:', result, '\n')
 
 
 if __name__ == '__main__':
