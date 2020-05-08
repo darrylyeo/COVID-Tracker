@@ -183,11 +183,12 @@ def query_from_config(db, config, task):
 		{},
 
 		# Sort
-		{ "$sort": ({ "date": 1 } if
-			(config["aggregation"] != "state" or config["target"] is not list) else
-			{ "county": 1, "date": 1} if
-			config["aggregation"] == "county" else
-			{ "state": 1, "date": 1} )
+		{ "$sort": 
+			{ "county": 1, "date": 1 }
+				if config["aggregation"] == "county" and config["target"] is list else
+			{ "state": 1, "date": 1 }
+				if config["aggregation"] == "state" and config["target"] is list else
+			{ "date": 1 }
 		}
 			if config["aggregation"] != "fiftyStates" else
 		{},
@@ -196,11 +197,12 @@ def query_from_config(db, config, task):
 		group_dict,
 
 		# Sort
-		{ "$sort": ({ "date": 1 } if
-			(config["aggregation"] != "state" or config["target"] is not list) else
-			{ "county": 1, "date": 1} if
-			config["aggregation"] == "county" else
-			{ "state": 1, "date": 1 })
+		{ "$sort": 
+			{ "county": 1, "date": 1 }
+				if config["aggregation"] == "county" and config["target"] is list else
+			{ "state": 1, "date": 1 }
+				if config["aggregation"] == "state" and config["target"] is list else
+			{ "date": 1 }
 		}
 			if config["aggregation"] != "fiftyStates" else
 		{}
