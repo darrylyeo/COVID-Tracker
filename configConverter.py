@@ -102,37 +102,36 @@ def query_from_config(db, config, task):
 		}
 	}
 
-	# Construct & return MongoDB query
-	return db.config["collection"].aggregate([
-		# Filter by target
-		{ "$match": {
+        # Initialize empty pipeline - begin constructing query
+        pipeline = []
+
+        # Filter by target
+	if "target" in config:
+		pipeline.append({ "$match": {
 			config["aggregation"]:
 				{ "$in": config["target"] }
 					if type(config["target"]) is list else
 				config["target"]
-		} }
-			if "target" in config else
-		{},
-
-		# Filter by counties
-		{ "$match": {
+		} })
+ 
+        # Filter by counties
+	if "counties" in config and config["collection"] == "states":
+		pipeline.append({ "$match": {
 			config["aggregation"]:
 				{ "$in": config["counties"] }
 					if type(config["counties"]) is list else
 				config["counties"]
-		} }
-			if "counties" in config and config["collection"] == "states" else
-		{},
+		} })
 
-		# Filter by only states
-		{ "$match": {
+	# Filter by only states
+	if config["aggregation"] == "fiftyStates":
+		pipeline.append({ "$match": {
 			"state": {"$nin": ["AS", "GM", "GU", "MH", "FM", "MP", "PW", "PR", "VI"]}
-		} }
-			if config["aggregation"] == "fiftyStates" else
-		{},
+		} })
 
-		# Filter by date range
-		{ "$match": { "date": {
+	# Filter by date range
+	if "time" in config:
+		pipeline.append({ "$match": { "date": {
 			"$gte": format_date(
 				config["time"]["start"] if "start" in config["time"] else
 				datetime.date(today.year, 1, 1) if config["time"] == "year" else
@@ -148,39 +147,37 @@ def query_from_config(db, config, task):
 				today if config["time"] == "week" else
 				30000101
 			)
-		} } }
-			if "time" in config else
-		{},
+		} } })
 
-		# Project
-		{ "$project": project_stage }
-			if "stats" not in task else
-		{},
+	# Project
+	if "stats" not in task:
+		pipeline.append({ "$project": project_stage })
 
-		# Sort
-		{ "$sort": 
+	# Sort
+        if config["aggregation"] != "fiftyStates":
+		pipeline.append({ "$sort": 
 			{ "county": 1, "date": 1 }
 				if config["aggregation"] == "county" and config["target"] is list else
 			{ "state": 1, "date": 1 }
 				if config["aggregation"] == "state" and config["target"] is list else
 			{ "date": 1 }
-		}
-			if config["aggregation"] != "fiftyStates" else
-		{},
+		})
 
-		# Group for analysis
-		{ "$group": group_stage },
+	# Group for analysis
+	pipeline.append({ "$group": group_stage })
 
-		# Sort
-		{ "$sort": 
+	# Sort
+        if config["aggregation"] != "fiftyStates":
+		pipeline.append({ "$sort": 
 			{ "county": 1, "date": 1 }
 				if config["aggregation"] == "county" and config["target"] is list else
 			{ "state": 1, "date": 1 }
 				if config["aggregation"] == "state" and config["target"] is list else
 			{ "date": 1 }
-		}
-			if config["aggregation"] != "fiftyStates" else
-		{}
+		})
 
-		# Optional? Project step at end for cosmetics
-	])
+	# Optional? Project step at end for cosmetics
+
+        # Construct & return MongoDB query
+	return db.config["collection"].aggregate(pipeline)
+
