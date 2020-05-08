@@ -57,7 +57,7 @@ def query_from_config(db, config, task):
 
 	# Construct grouping dictionary
 	if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa":
-		group_dict = {
+		group_stage = {
 			"_id": "$date" if config["aggregation"] == "usa" else 1,
 			(
 				"s" + task["track"]
@@ -68,31 +68,29 @@ def query_from_config(db, config, task):
 			}
 		}
 	else:
-		group_dict = {
-			"$group": {
-				"_id": (
-					config["aggregation"]
-						if config["aggregation"] == "state" and config["target"] is list else
-					"$date"
-						if config["aggregation"] == "usa" else
-					config["target"] # If config["aggregation"] == "state"
-				),
-				# Aggregate fields are hardcoded - may contain garbage if not applicable
-				"array": {
-					"$push": (
-						task["track"]
-							if "track" in task else
-						task.keys()[0]
-					)
-				},
-				"dateArray": {"$push": "$date"},
-				# Example - attributes can be made by:
-				# json1['analysis'][0]['task'].keys()[0] + 'shmee'
-			}
+		group_stage = {
+			"_id": (
+				config["aggregation"]
+					if config["aggregation"] == "state" and config["target"] is list else
+				"$date"
+					if config["aggregation"] == "usa" else
+				config["target"] # If config["aggregation"] == "state"
+			),
+			# Aggregate fields are hardcoded - may contain garbage if not applicable
+			"array": {
+				"$push": (
+					task["track"]
+						if "track" in task else
+					task.keys()[0]
+				)
+			},
+			"dateArray": {"$push": "$date"},
+			# Example - attributes can be made by:
+			# json1['analysis'][0]['task'].keys()[0] + 'shmee'
 		}
 	if "stats" in task:
 		# Load dictionary with items with number that can't be predetermined
-		group_dict["$group"] += {
+		group_stage += {
 			"avg" + stat: {"$avg": stat}
 			for stat in task["stats"]
 		} + {
@@ -101,29 +99,26 @@ def query_from_config(db, config, task):
 		}
 
 	# Construct projection dictionary
-	if "track" in task:
-		project_dict = {
-			"$project": {
-				"_id": 0,
-				task["track"]: 1,
-				"date": 1,
-				"state": 1
-			}
+	project_stage = (
+		{
+			"_id": 0,
+			task["track"]: 1,
+			"date": 1,
+			"state": 1
 		}
-	else:
-		project_dict = {
-			"$project": {
-				"_id": 0,
-				task.keys()[0]: {
-					"$divide": [
-						task["ratio"]["numerator"],
-						task["ratio"]["denominator"]
-					]
-				},
-				"date": 1,
-				"state": 1
-			}
+			if "track" in task else
+		{
+			"_id": 0,
+			task.keys()[0]: {
+				"$divide": [
+					task["ratio"]["numerator"],
+					task["ratio"]["denominator"]
+				]
+			},
+			"date": 1,
+			"state": 1
 		}
+	)
 
 	# Construct & return MongoDB query
 	return db.config["collection"].aggregate([
@@ -176,7 +171,7 @@ def query_from_config(db, config, task):
 		{},
 
 		# Project
-		project_dict
+		{ "$project": project_stage }
 			if "stats" not in task else
 		{},
 
@@ -192,7 +187,7 @@ def query_from_config(db, config, task):
 		{},
 
 		# Group for analysis
-		group_dict,
+		{ "$group": group_stage },
 
 		# Sort
 		{ "$sort": 
