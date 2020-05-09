@@ -102,10 +102,10 @@ def query_from_config(db, config, task):
 		}
 	}
 
-        # Initialize empty pipeline - begin constructing query
-        pipeline = []
+	# Initialize empty pipeline - begin constructing query
+	pipeline = []
 
-        # Filter by target
+	# Filter by target
 	if "target" in config:
 		pipeline.append({ "$match": {
 			config["aggregation"]:
@@ -114,7 +114,7 @@ def query_from_config(db, config, task):
 				config["target"]
 		} })
  
-        # Filter by counties
+	# Filter by counties
 	if "counties" in config and config["collection"] == "states":
 		pipeline.append({ "$match": {
 			config["aggregation"]:
@@ -154,7 +154,7 @@ def query_from_config(db, config, task):
 		pipeline.append({ "$project": project_stage })
 
 	# Sort
-        if config["aggregation"] != "fiftyStates":
+	if config["aggregation"] != "fiftyStates":
 		pipeline.append({ "$sort": 
 			{ "county": 1, "date": 1 }
 				if config["aggregation"] == "county" and config["target"] is list else
@@ -167,7 +167,7 @@ def query_from_config(db, config, task):
 	pipeline.append({ "$group": group_stage })
 
 	# Sort
-        if config["aggregation"] != "fiftyStates":
+	if config["aggregation"] != "fiftyStates":
 		pipeline.append({ "$sort": 
 			{ "county": 1, "date": 1 }
 				if config["aggregation"] == "county" and config["target"] is list else
@@ -178,6 +178,6 @@ def query_from_config(db, config, task):
 
 	# Optional? Project step at end for cosmetics
 
-        # Construct & return MongoDB query
+	# Construct & return MongoDB query
 	return db.config["collection"].aggregate(pipeline)
 
