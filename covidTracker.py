@@ -68,7 +68,7 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			results = get_results(db, config)
 
 			# Print results
-			for i, result in results.enumerate():
+			for i, result in enumerate(results):
 				print('Query', i, 'Results:', result, '\n')
 
 
