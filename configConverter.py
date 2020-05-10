@@ -49,7 +49,7 @@ def query_from_config(db, config, task):
 			(
 				"s" + task["track"]
 					if "track" in task else
-				task.keys()[0]
+				list(task.values())[0]
 			): {
 				"$sum": task["track"]
 			}
@@ -68,7 +68,7 @@ def query_from_config(db, config, task):
 				"$push": (
 					task["track"]
 						if "track" in task else
-					task.keys()[0]
+					list(task.values())[0]
 				)
 			},
 			"dateArray": {"$push": "$date"},
@@ -95,7 +95,7 @@ def query_from_config(db, config, task):
 	project_stage.update({
 		task["track"]: 1
 	} if "track" in task else {
-		task.keys()[0]: {
+		list(task.values())[0]: {
 			"$divide": [
 				task["ratio"]["numerator"],
 				task["ratio"]["denominator"]
