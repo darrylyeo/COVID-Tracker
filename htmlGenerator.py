@@ -4,13 +4,19 @@
 
 
 def table(data, config):
+	rows = ''.join([
+		f'''
+		<div>
+			<dt>{row['date']}</dt><dd>{row['date']}</dd>
+		</div>
+		'''
+		for row in data
+	])
+
 	return f'''
 		<h1>{config['table']}</h1>
 		<dl>
-			{''.join([
-				f"<dt>{row['date']}</dt><dd>{row['date']}</dd>"
-				for row in data
-			])}
+			{rows}
 		</dl>
 	'''
 
@@ -48,6 +54,10 @@ def results_to_html(data, config):
 
 		section {
 			padding: 1rem;
+		}
+
+		dl {
+			display: grid;
 		}
 	'''
 
