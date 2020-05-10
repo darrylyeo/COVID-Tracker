@@ -4,15 +4,61 @@
 # htmlGenerator: produces HTML report containing tables & graphs for analytics
 
 
-# Takes in query result JSON, and creates an HTML doc from this?
-def results_to_html(data):
-	return '''
-		<style>
-			* {
-				margin: 0;
-			}
-		</style>
-		<body>
+def table(data, config):
+	return f'''
+		<h1>{config['table']}</h1>
+		<dl>
+			{''.join([
+				f"<dt>{row['date']}</dt><dd>{row['date']}</dd>"
+				for row in data
+			])}
+		</dl>
+	'''
 
+
+def graph(data, config):
+	return ''
+
+
+# Takes in query result JSON, and creates an HTML doc from this?
+def results_to_html(data, config):
+	sections = '\n'.join([
+		f'''
+			<section>
+				{
+					graph(data, output['graph'])
+						if 'graph' in output else
+					table(data, output['table'])
+						if 'table' in output else
+					''
+				}
+			</section>
+		'''
+		for output in [analysis['output']]
+		for analysis in config["analysis"]
+	])
+
+	css = '''
+		* {
+			margin: 0;
+		}
+
+		:root {
+			font-family: sans-serif;
+		}
+
+		section {
+			padding: 1rem;
+		}
+	'''
+
+	return f'''
+		<head>
+			<title>COVID Tracker</title>
+			<style>{css}</style>
+		</head>
+		<body>
+			<title>COVID Tracker</title>
+			{sections}
 		</body>
 	'''
