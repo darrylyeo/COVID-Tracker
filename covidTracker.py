@@ -27,9 +27,9 @@ def json_from_csv(csv_file):
 	return [
 		{
 			"deaths": int(obj["deaths"]),
-			"county": unicode(obj["county"], "utf-8"),
-			"state": unicode(obj["state"], "utf-8"),
-			"fips": unicode(obj["fips"], "utf-8"),
+			"county": obj["county"],
+			"state": obj["state"],
+			"fips": obj["fips"],
 			"date": int(obj["date"].replace('-', '')),
 			"cases": int(obj["cases"])
 		}
