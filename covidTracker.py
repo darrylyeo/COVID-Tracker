@@ -41,7 +41,7 @@ def json_from_csv(csv_file):
 # and imports into MongoDB collections if necessary: covid & states
 def load_data(db, collection, data_file, refresh=False):
 	if refresh:
-		db[collection].delete({})
+		db[collection].remove({})
 
 	if db[collection].find().count() == 0 or refresh:
 		with open(data_file, 'r') as data:
