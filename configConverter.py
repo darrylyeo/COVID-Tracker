@@ -77,13 +77,14 @@ def query_from_config(db, config, task):
 		}
 	if "stats" in task:
 		# Load dictionary with items with number that can't be predetermined
-		group_stage += {
+		group_stage.update({
 			"avg" + stat: {"$avg": stat}
 			for stat in task["stats"]
-		} + {
+		})
+		group_stage.update({
 			"std" + stat: {"$stdDevPop": stat}
 			for stat in task["stats"]
-		}
+		})
 
 	# Construct projection dictionary
 	project_stage = {
@@ -91,7 +92,7 @@ def query_from_config(db, config, task):
 		"date": 1,
 		"state": 1
 	}
-	project_stage += {
+	project_stage.update({
 		task["track"]: 1
 	} if "track" in task else {
 		task.keys()[0]: {
@@ -100,7 +101,7 @@ def query_from_config(db, config, task):
 				task["ratio"]["denominator"]
 			]
 		}
-	}
+	})
 
 	# Initialize empty pipeline - begin constructing query
 	pipeline = []
