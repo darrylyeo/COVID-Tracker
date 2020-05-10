@@ -45,7 +45,11 @@ def load_data(db, collection, data_file, refresh=False):
 
 	if db[collection].find().count() == 0 or refresh:
 		with open(data_file, 'r') as data:
-			db[collection].insert_many(json.load(data))
+			db[collection].insert_many(
+				json.load(data)
+					if ".json" in data_file else
+				json_from_csv(data)
+			)
 
 
 def main(auth_file, config_file, covid_data_file, states_data_file):
