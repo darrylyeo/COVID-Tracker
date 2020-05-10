@@ -3,3 +3,5 @@ python3 covidTracker.py -config config02.json
 python3 covidTracker.py -config config03.json
 python3 covidTracker.py -config config04.json
 python3 covidTracker.py -config config05.json
+python3 covidTracker.py -config config06.json
+python3 covidTracker.py -config config07.json
