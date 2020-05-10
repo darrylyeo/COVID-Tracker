@@ -1,6 +1,5 @@
-# Darryl Yeo, Quinn Coleman
-# dayeo@calpoly.edu, qcoleman@calpoly.edu
 # Lab 4 - CSC 369 Spring 2020
+# Darryl Yeo (dayeo@calpoly.edu) and Quinn Coleman (qcoleman@calpoly.edu)
 # covidTracker: an analytical tool for tracking COVID spread in the US
 
 import argparse, csv, json

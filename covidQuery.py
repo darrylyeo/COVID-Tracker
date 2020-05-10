@@ -1,7 +1,6 @@
-# Darryl Yeo, Quinn Coleman
-# dayeo@calpoly.edu, qcoleman@calpoly.edu
 # Lab 4 - CSC 369 Spring 2020
-# configConverter: converts input config file into a MongoDB query
+# Darryl Yeo (dayeo@calpoly.edu) and Quinn Coleman (qcoleman@calpoly.edu)
+# covidQuery: converts input config file into a MongoDB query
 
 
 import datetime, json
