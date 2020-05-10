@@ -6,7 +6,7 @@
 import argparse, csv, json
 from pymongo import MongoClient
 
-from configConverter import *
+from covidQuery import *
 from htmlGenerator import *
 
 
@@ -65,7 +65,7 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 
 			# Results is a list of query results
 			# where each query result is a list of json objects
-			results = get_results(db, config)
+			results = query_from_config(db, config)
 
 			# Print results
 			for i, result in enumerate(results):

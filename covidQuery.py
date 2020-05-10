@@ -17,7 +17,7 @@ def format_date(date):
 
 
 # Function that given a config file, returns all query results
-def get_results(db, config):
+def query_from_config(db, config):
 	# Aggregation checks
 	if (
 		config["collection"] == "states" and
@@ -33,13 +33,13 @@ def get_results(db, config):
 
 	# Perform each query as specified in Analysis attribute
 	return [
-		list(query_from_config(db, config, task["task"]))
+		list(query_task(db, config, task["task"]))
 		for task in config["analysis"]
 	]
 
 
 # Function that takes in config file JSON, and converts it into query
-def query_from_config(db, config, task):
+def query_task(db, config, task):
 	today = datetime.date.today()
 
 	# Construct grouping dictionary
