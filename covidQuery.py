@@ -91,15 +91,18 @@ def query_task(db, config, task):
 		"date": 1,
 		"state": 1
 	}
+	task_key = list(task.keys())[0]
 	project_stage.update({
 		task["track"]: 1
 	} if "track" in task else {
-		list(task.values())[0]: {
+		"the_ratio": {
 			"$divide": [
-				task["ratio"]["numerator"],
-				task["ratio"]["denominator"]
+				"$" + task[task_key]["numerator"],
+				"$" + task[task_key]["denominator"]
 			]
 		}
+	} if "ratio" in task else {	# Stats case    
+		item: 1 for item in task[task_key]
 	})
 
 	# Initialize empty pipeline - begin constructing query
