@@ -70,8 +70,12 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			for i, result in enumerate(results):
 				print('Query', i, 'Results:', result, '\n')
 
-			# Make graphs of results if applicable
-			graph(results, config)
+			# Generate HTML and graphs
+			output_file = config["output"] or "index.html"
+			with open(output_file, 'w') as output:
+				output.write(
+					results_to_html(results, config)
+				)
 
 
 if __name__ == '__main__':
