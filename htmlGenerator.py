@@ -30,7 +30,7 @@ def single_graph(graph_data, labels, graph_config, name):
 			plt.plot(range(len(data)), data, label=labels[i])
 		elif graph_config["type"] == "bar":
 			plt.bar(range(len(data)), data, label=labels[i])
-		else:	# Scatter plot case
+		elif graph_config["type"] == "scatter":
 			plt.scatter(range(len(data)), data, label=labels[i])
 
 	if "legend" in graph_config and graph_config["legend"] == "on":
@@ -106,7 +106,7 @@ def graph(data, config, task_config, graph_config):
 			single_graph([data], [labels[i]], graph_config, "graph" + str(i))
 
 	# Combine
-	else:
+	elif graph_config["combo"] == "combine":
 		single_graph(graph_data, labels, graph_config, "graph")
 
 
