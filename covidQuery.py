@@ -66,7 +66,7 @@ def query_task(db, config, task):
 				"$push":
 					"$" + task["track"]
 						if "track" in task else
-					list(task.values())[0]
+					"$the_ratio"
 			},
 			"dateArray": {"$push": "$date"},
 			# Example - attributes can be made by:
