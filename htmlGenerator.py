@@ -2,6 +2,7 @@
 # Darryl Yeo (dayeo@calpoly.edu) and Quinn Coleman (qcoleman@calpoly.edu)
 # htmlGenerator: produces HTML report containing tables & graphs for analytics
 
+
 import matplotlib.pyplot as plt
 
 
@@ -9,14 +10,14 @@ def table(data, config):
 	rows = ''.join([
 		f'''
 		<div>
-			<dt>{row['date']}</dt><dd>{row['date']}</dd>
+			<dt>{row["date"]}</dt><dd>{row["date"]}</dd>
 		</div>
 		'''
 		for row in data
 	])
 
 	return f'''
-		<h1>{config['table']}</h1>
+		<h1>{config["table"]}</h1>
 		<dl>
 			{rows}
 		</dl>
@@ -116,15 +117,15 @@ def results_to_html(data, config):
 		f'''
 			<section>
 				{
-					graph(data, output['graph'])
+					graph(data, output["graph"])
 						if 'graph' in output else
-					table(data, output['table'])
+					table(data, output["table"])
 						if 'table' in output else
 					''
 				}
 			</section>
 		'''
-		for output in [analysis['output']]
+		for output in [analysis["output"]]
 		for analysis in config["analysis"]
 	])
 
