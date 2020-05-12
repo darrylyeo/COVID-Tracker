@@ -23,7 +23,7 @@ def table(data, config):
 	'''
 
 
-def single_graph(graph_data, labels, graph_config):
+def single_graph(graph_data, labels, graph_config, name):
 	for i, data in enumerate(graph_data):
 		if graph_config["type"] == "line":	
 			plt.plot(range(len(data)), data, label=labels[i])
@@ -36,8 +36,7 @@ def single_graph(graph_data, labels, graph_config):
 		plt.legend()
 	if "title" in graph_config:
 		plt.title(graph_config["title"])
-
-	plt.savefig()
+	plt.savefig(name)
 
 
 # Produces a graph and outputs it as a picture file in cwd, if applicable
@@ -86,15 +85,15 @@ def graph(data, config):
 			if graph_config["combo"] == "split":
 				# Construct one graph per <level of aggregation>
 				for i, data in enumerate(graph_data):
-					single_graph([data], [labels[i]], graph_config)
+					single_graph([data], [labels[i]], graph_config, "graph" + str(i))
 
 			elif graph_config["combo"] == "separate":
 				# Construct one graph per <level of aggregation>
 				for i, data in enumerate(graph_data):
-					single_graph([data], [labels[i]], graph_config)
+					single_graph([data], [labels[i]], graph_config, "graph" + str(i))
 
 			else:	# Combine	
-				single_graph(graph_data, labels, graph_config)
+				single_graph(graph_data, labels, graph_config, "graph")
 
 
 # Takes in query result JSON, and creates an HTML doc from this?
