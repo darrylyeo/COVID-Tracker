@@ -55,20 +55,18 @@ def query_task(db, config, task):
 		}
 	else:
 		group_stage = {
-			"_id": (
+			"_id":
 				config["aggregation"]
 					if config["aggregation"] == "state" and config["target"] is list else
 				"$date"
 					if config["aggregation"] == "usa" else
-				config["target"] # If config["aggregation"] == "state"
-			),
+				config["target"], # If config["aggregation"] == "state"
 			# Aggregate fields are hardcoded - may contain garbage if not applicable
 			"array": {
-				"$push": (
+				"$push":
 					task["track"]
 						if "track" in task else
 					list(task.values())[0]
-				)
 			},
 			"dateArray": {"$push": "$date"},
 			# Example - attributes can be made by:
@@ -112,27 +110,33 @@ def query_task(db, config, task):
 
 	# Filter by target
 	if "target" in config:
-		pipeline.append({ "$match": {
-			config["aggregation"]:
-				{ "$in": config["target"] }
-					if type(config["target"]) is list else
-				config["target"]
-		} })
+		pipeline.append({
+			"$match": {
+				config["aggregation"]:
+					{ "$in": config["target"] }
+						if type(config["target"]) is list else
+					config["target"]
+			}
+		})
 
 	# Filter by counties
 	if "counties" in config and config["collection"] == "states":
-		pipeline.append({ "$match": {
-			config["aggregation"]:
-				{ "$in": config["counties"] }
-					if type(config["counties"]) is list else
-				config["counties"]
-		} })
+		pipeline.append({
+			"$match": {
+				config["aggregation"]:
+					{ "$in": config["counties"] }
+						if type(config["counties"]) is list else
+					config["counties"]
+			}
+		})
 
 	# Filter by only states
 	if config["aggregation"] == "fiftyStates":
-		pipeline.append({ "$match": {
-			"state": {"$nin": ["AS", "GM", "GU", "MH", "FM", "MP", "PW", "PR", "VI"]}
-		} })
+		pipeline.append({
+			"$match": {
+				"state": { "$nin": ["AS", "GM", "GU", "MH", "FM", "MP", "PW", "PR", "VI"] }
+			}
+		})
 
 	# Filter by date range
 	if "time" in config:
