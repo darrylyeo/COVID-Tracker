@@ -70,6 +70,9 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			for i, result in enumerate(results):
 				print('Query', i, 'Results:', result, '\n')
 
+			# Make graphs of results if applicable
+			graph(results, config)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(

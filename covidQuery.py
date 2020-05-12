@@ -101,9 +101,11 @@ def query_task(db, config, task):
 				"$" + task[task_key]["denominator"]
 			]
 		}
-	} if "ratio" in task else {	# Stats case    
+        } if "ratio" in task else {	# Stats case    
 		item: 1 for item in task[task_key]
 	})
+        if config["aggregation"] == "county":
+            project_stage["county"] = 1
 
 	# Initialize empty pipeline - begin constructing query
 	pipeline = []
