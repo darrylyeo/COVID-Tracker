@@ -6,7 +6,7 @@
 import matplotlib.pyplot as plt
 
 
-def table(data, config):
+def table(data, config, task_config, table_config):
 	rows = ''.join([
 		f'''
 		<div>
@@ -42,73 +42,72 @@ def single_graph(graph_data, labels, graph_config, name):
 
 
 # Produces a graph and outputs it as a picture file in cwd, if applicable
-def graph(data, config):
-	for i, query in enumerate(config["analysis"]):
-		if "graph" in query["output"]:
-			graph_config = query["output"]["graph"]
-			graph_data, labels = [], []
+def graph(data, config, task_config, graph_config):
+	graph_data = []
+	labels = []
 
-			has_track = list(query["task"].keys())[0] == "track"
+	has_track = list(task_config.keys())[0] == "track"
 
-			# Create graph data & labels - separate data sources if applicable
-			if (
-				config["aggregation"] == "state" and
-				"target" in config and config["target"] is list
-			):
-				for state in config["target"]:
-					filtered_data = [
-						obs for obs in data[i]
-						if obs["state"] == state
-					]
-					graph_data.append(
-						[obs[query["task"]["track"]] for obs in filtered_data]
-							if has_track else
-						[obs["the_ratio"] for obs in filtered_data]
-					)
-					labels.append(state)
+	# Create graph data & labels - separate data sources if applicable
+	if (
+		config["aggregation"] == "state" and
+		"target" in config and config["target"] is list
+	):
+		for state in config["target"]:
+			filtered_data = [
+				obs for obs in data[i]
+				if obs["state"] == state
+			]
+			graph_data.append(
+				[obs[task_config["track"]] for obs in filtered_data]
+					if has_track else
+				[obs["the_ratio"] for obs in filtered_data]
+			)
+			labels.append(state)
 
-			elif (
-				config["aggregation"] == "county" and
-				"counties" in config and config["counties"] is list
-			):
-				for county in config["counties"]:
-					filtered_data = [
-						obs for obs in data[i]
-						if obs["county"] == county
-					]
-					graph_data.append(
-						[obs[query["task"]["track"]] for obs in filtered_data]
-							if has_track else
-						[obs["the_ratio"] for obs in filtered_data]
-					)
-					labels.append(county)
+	elif (
+		config["aggregation"] == "county" and
+		"counties" in config and config["counties"] is list
+	):
+		for county in config["counties"]:
+			filtered_data = [
+				obs for obs in data[i]
+				if obs["county"] == county
+			]
+			graph_data.append(
+				[obs[task_config["track"]] for obs in filtered_data]
+					if has_track else
+				[obs["the_ratio"] for obs in filtered_data]
+			)
+			labels.append(county)
 
-			else:
-				graph_data.append(
-					[obs[query["task"]["track"]] for obs in data[i]]
-						if has_track else
-					[obs["the_ratio"] for obs in data[i]]
-				)
-				labels.append(
-					query["task"]["track"]
-						if has_track else
-					"ratio"
-				)
+	else:
+		graph_data.append(
+			[obs[task_config["track"]] for obs in data[i]]
+				if has_track else
+			[obs["the_ratio"] for obs in data[i]]
+		)
+		labels.append(
+			task_config["track"]
+				if has_track else
+			"ratio"
+		)
 
-			# Make graph
-			if graph_config["combo"] == "split":
-				# Construct one graph per <level of aggregation>
-				for i, data in enumerate(graph_data):
-					single_graph([data], [labels[i]], graph_config, "graph" + str(i))
+	# Make graph
 
-			# Construct one graph per <level of aggregation>
-			elif graph_config["combo"] == "separate":
-				for i, data in enumerate(graph_data):
-					single_graph([data], [labels[i]], graph_config, "graph" + str(i))
+	# Construct one graph per <level of aggregation>
+	if graph_config["combo"] == "split":
+		for i, data in enumerate(graph_data):
+			single_graph([data], [labels[i]], graph_config, "graph" + str(i))
 
-			# Combine
-			else:
-				single_graph(graph_data, labels, graph_config, "graph")
+	# Construct one graph per <level of aggregation>
+	elif graph_config["combo"] == "separate":
+		for i, data in enumerate(graph_data):
+			single_graph([data], [labels[i]], graph_config, "graph" + str(i))
+
+	# Combine
+	else:
+		single_graph(graph_data, labels, graph_config, "graph")
 
 
 # Takes in query result JSON, and creates an HTML doc from this?
@@ -117,15 +116,17 @@ def results_to_html(data, config):
 		f'''
 			<section>
 				{
-					graph(data, output["graph"])
-						if 'graph' in output else
-					table(data, output["table"])
-						if 'table' in output else
+					graph(data, config, analysis["task"], analysis["output"]["graph"])
+						if "graph" in analysis["output"] else
+					''
+				}
+				{
+					table(data, config, analysis["task"], analysis["output"]["table"])
+						if "table" in analysis["output"] else
 					''
 				}
 			</section>
 		'''
-		for output in [analysis["output"]]
 		for analysis in config["analysis"]
 	])
 
@@ -153,7 +154,7 @@ def results_to_html(data, config):
 			<style>{css}</style>
 		</head>
 		<body>
-			<title>COVID Tracker</title>
+			<h1>COVID Tracker</h1>
 			{sections}
 		</body>
 	'''
