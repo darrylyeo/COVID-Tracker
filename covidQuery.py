@@ -64,7 +64,7 @@ def query_task(db, config, task):
 			# Aggregate fields are hardcoded - may contain garbage if not applicable
 			"array": {
 				"$push":
-					task["track"]
+					"$" + task["track"]
 						if "track" in task else
 					list(task.values())[0]
 			},
