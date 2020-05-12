@@ -70,7 +70,9 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 				print('Query', i, 'Results:', result, '\n')
 
 			# Generate HTML and graphs
-			output_file = config["output"] or "index.html"
+			output_file = (config["output"] 
+				if "output" in config else
+				"index.html")
 			with open(output_file, 'w') as output:
 				output.write(
 					results_to_html(results, config)

@@ -190,5 +190,5 @@ def query_task(db, config, task):
 	# Optional? Project step at end for cosmetics
 
 	# Construct & return MongoDB query
-	return db.config["collection"].aggregate(pipeline)
+	return db[config["collection"]].aggregate(pipeline)
 
