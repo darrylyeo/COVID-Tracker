@@ -24,7 +24,7 @@ def query_from_config(db, config):
 	):
 		print("Cannot aggregate over 'usa' or 'fiftyStates' if collection is 'states'")
 		exit(1)
-	
+
 	if config["collection"] == "covid" and config["aggregation"] == "county":
 		print("Cannot aggregate over 'county' if collection is 'covid'")
 		exit(1)
@@ -101,7 +101,7 @@ def query_task(db, config, task):
 				"$" + task[task_key]["denominator"]
 			]
 		}
-        } if "ratio" in task else {	# Stats case    
+	} if "ratio" in task else {	# Stats case
 		item: 1 for item in task[task_key]
 	})
 	if config["aggregation"] == "county":
@@ -118,7 +118,7 @@ def query_task(db, config, task):
 					if type(config["target"]) is list else
 				config["target"]
 		} })
- 
+
 	# Filter by counties
 	if "counties" in config and config["collection"] == "states":
 		pipeline.append({ "$match": {
@@ -160,12 +160,13 @@ def query_task(db, config, task):
 
 	# Sort
 	if config["aggregation"] != "fiftyStates":
-		pipeline.append({ "$sort": 
-			{ "county": 1, "date": 1 }
-				if config["aggregation"] == "county" and config["target"] is list else
-			{ "state": 1, "date": 1 }
-				if config["aggregation"] == "state" and config["target"] is list else
-			{ "date": 1 }
+		pipeline.append({
+			"$sort":
+				{ "county": 1, "date": 1 }
+					if config["aggregation"] == "county" and config["target"] is list else
+				{ "state": 1, "date": 1 }
+					if config["aggregation"] == "state" and config["target"] is list else
+				{ "date": 1 }
 		})
 
 	# Group for analysis
@@ -173,12 +174,13 @@ def query_task(db, config, task):
 
 	# Sort
 	if config["aggregation"] != "fiftyStates":
-		pipeline.append({ "$sort": 
-			{ "county": 1, "date": 1 }
-				if config["aggregation"] == "county" and config["target"] is list else
-			{ "state": 1, "date": 1 }
-				if config["aggregation"] == "state" and config["target"] is list else
-			{ "date": 1 }
+		pipeline.append({
+			"$sort":
+				{ "county": 1, "date": 1 }
+					if config["aggregation"] == "county" and config["target"] is list else
+				{ "state": 1, "date": 1 }
+					if config["aggregation"] == "state" and config["target"] is list else
+				{ "date": 1 }
 		})
 
 	# Optional? Project step at end for cosmetics
