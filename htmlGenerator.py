@@ -24,7 +24,7 @@ def table(data, config, task_config, table_config):
 	'''
 
 
-def single_graph(graph_data, labels, graph_config, name):
+def single_graph(file_name, graph_config, graph_data, labels):
 	for i, data in enumerate(graph_data):
 		if graph_config["type"] == "line":
 			plt.plot(range(len(data)), data, label=labels[i])
@@ -38,13 +38,13 @@ def single_graph(graph_data, labels, graph_config, name):
 	if "title" in graph_config:
 		plt.title(graph_config["title"])
 
-	plt.savefig(name)
+	plt.savefig(file_name)
 
-	return f'<img src="${name}">'
+	return f'<img src="${file_name}">'
 
 
 # Produces a graph and outputs it as a picture file in cwd, if applicable
-def graph(data, config, task_config, graph_config):
+def graph(config, task_config, graph_config, data):
 	graph_data = []
 	labels = []
 
@@ -100,34 +100,34 @@ def graph(data, config, task_config, graph_config):
 	# Construct one graph per <level of aggregation>
 	if graph_config["combo"] == "split":
 		return ''.join([
-			single_graph([data], [labels[i]], graph_config, "graph" + str(i))
+			single_graph("graph" + str(i), graph_config, [data], [labels[i]])
 			for i, data in enumerate(graph_data)
 		])
 
 	# Construct one graph per <level of aggregation>
 	elif graph_config["combo"] == "separate":
 		return ''.join([
-			single_graph([data], [labels[i]], graph_config, "graph" + str(i))
+			single_graph("graph" + str(i), graph_config, [data], [labels[i]])
 			for i, data in enumerate(graph_data)
 		])
 	
 	# Combine
 	elif graph_config["combo"] == "combine":
-		return single_graph(graph_data, labels, graph_config, "graph")
+		return single_graph("graph", graph_config, graph_data, labels)
 
 
-# Takes in query result JSON, and creates an HTML doc from this?
-def results_to_html(data, config):
+# Takes in query result JSON and creates an HTML document
+def results_to_html(config, data):
 	sections = '\n'.join([
 		f'''
 			<section>
 				{
-					graph(data, config, analysis["task"], analysis["output"]["graph"])
+					graph(config, analysis["task"], analysis["output"]["graph"], data)
 						if "graph" in analysis["output"] else
 					''
 				}">
 				{
-					table(data, config, analysis["task"], analysis["output"]["table"])
+					table(config, analysis["task"], analysis["output"]["table"], data)
 						if "table" in analysis["output"] else
 					''
 				}

@@ -62,8 +62,7 @@ def main(auth_file, config_file, covid_data_file, states_data_file):
 			load_data(db, "covid", covid_data_file, refresh=config["refresh"])
 			load_data(db, "states", states_data_file, refresh=config["refresh"])
 
-			# Results is a list of query results
-			# where each query result is a list of json objects
+			# Results is a list of query results where each query result is a list of json objects
 			results = query_from_config(db, config)
 
 			# Print results
