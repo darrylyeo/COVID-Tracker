@@ -47,17 +47,21 @@ def graph(data, config):
 			graph_config = query["output"]["graph"]
 			graph_data, labels = [], []
 
+			has_track = list(query["task"].keys())[0] == "track"
+
 			# Create graph data & labels - separate data sources if applicable
 			if (
 				config["aggregation"] == "state" and
 				"target" in config and config["target"] is list
 			):
 				for state in config["target"]:
-					filtered_data = [obs for obs in data[i]
-									 if obs["state"] == state]
+					filtered_data = [
+						obs for obs in data[i]
+						if obs["state"] == state
+					]
 					graph_data.append(
 						[obs[query["task"]["track"]] for obs in filtered_data]
-							if list(query["task"].keys())[0] == "track" else
+							if has_track else
 						[obs["the_ratio"] for obs in filtered_data]
 					)
 					labels.append(state)
@@ -67,11 +71,13 @@ def graph(data, config):
 				"counties" in config and config["counties"] is list
 			):
 				for county in config["counties"]:
-					filtered_data = [obs for obs in data[i]
-									 if obs["county"] == county]
+					filtered_data = [
+						obs for obs in data[i]
+						if obs["county"] == county
+					]
 					graph_data.append(
 						[obs[query["task"]["track"]] for obs in filtered_data]
-							if list(query["task"].keys())[0] == "track" else
+							if has_track else
 						[obs["the_ratio"] for obs in filtered_data]
 					)
 					labels.append(county)
@@ -79,12 +85,12 @@ def graph(data, config):
 			else:
 				graph_data.append(
 					[obs[query["task"]["track"]] for obs in data[i]]
-						if list(query["task"].keys())[0] == "track" else
+						if has_track else
 					[obs["the_ratio"] for obs in data[i]]
 				)
 				labels.append(
 					query["task"]["track"]
-						if list(query["task"].keys())[0] == "track" else
+						if has_track else
 					"ratio"
 				)
 
