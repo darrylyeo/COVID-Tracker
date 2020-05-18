@@ -57,13 +57,14 @@ def graph(config, task_config, graph_config, data):
 	):
 		for state in config["target"]:
 			filtered_data = [
-				obs for obs in data
-				if obs["state"] == state
+				data_point for data_point in query
+				if data_point["state"] == state
+				for query in data
 			]
 			graph_data.append(
-				[obs[task_config["track"]] for obs in filtered_data]
+				[data_point[task_config["track"]] for data_point in filtered_data]
 					if has_track else
-				[obs["the_ratio"] for obs in filtered_data]
+				[data_point["the_ratio"] for data_point in filtered_data]
 			)
 			labels.append(state)
 
@@ -73,21 +74,23 @@ def graph(config, task_config, graph_config, data):
 	):
 		for county in config["counties"]:
 			filtered_data = [
-				obs for obs in data
-				if obs["county"] == county
+				data_point for data_point in query
+				if data_point["county"] == county
+				for query in data
 			]
 			graph_data.append(
-				[obs[task_config["track"]] for obs in filtered_data]
+				[data_point[task_config["track"]] for data_point in filtered_data]
 					if has_track else
-				[obs["the_ratio"] for obs in filtered_data]
+				[data_point["the_ratio"] for data_point in filtered_data]
 			)
 			labels.append(county)
 
 	else:
 		graph_data.append(
-			[obs[task_config["track"]] for obs in data]
+			[data_point[task_config["track"]] for data_point in query]
 				if has_track else
-			[obs["the_ratio"] for obs in data]
+			[data_point["the_ratio"] for data_point in query]
+			for query in data
 		)
 		labels.append(
 			task_config["track"]
@@ -117,7 +120,7 @@ def graph(config, task_config, graph_config, data):
 
 
 # Takes in query result JSON and creates an HTML document
-def results_to_html(data, config):
+def results_to_html(config, data):
 	sections = '\n'.join([
 		f'''
 			<section>
