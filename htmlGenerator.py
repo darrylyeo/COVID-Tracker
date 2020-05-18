@@ -57,7 +57,7 @@ def graph(config, task_config, graph_config, data):
 	):
 		for state in config["target"]:
 			filtered_data = [
-				obs for obs in data[i]
+				obs for obs in data
 				if obs["state"] == state
 			]
 			graph_data.append(
@@ -73,7 +73,7 @@ def graph(config, task_config, graph_config, data):
 	):
 		for county in config["counties"]:
 			filtered_data = [
-				obs for obs in data[i]
+				obs for obs in data
 				if obs["county"] == county
 			]
 			graph_data.append(
@@ -85,9 +85,9 @@ def graph(config, task_config, graph_config, data):
 
 	else:
 		graph_data.append(
-			[obs[task_config["track"]] for obs in data[i]]
+			[obs[task_config["track"]] for obs in data]
 				if has_track else
-			[obs["the_ratio"] for obs in data[i]]
+			[obs["the_ratio"] for obs in data]
 		)
 		labels.append(
 			task_config["track"]
