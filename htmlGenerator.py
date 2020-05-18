@@ -117,7 +117,7 @@ def graph(config, task_config, graph_config, data):
 
 
 # Takes in query result JSON and creates an HTML document
-def results_to_html(config, data):
+def results_to_html(data, config):
 	sections = '\n'.join([
 		f'''
 			<section>
