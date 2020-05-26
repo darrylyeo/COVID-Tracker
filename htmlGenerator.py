@@ -5,19 +5,51 @@
 
 import matplotlib.pyplot as plt
 
-
-def table(data, config, task_config, table_config):
-	rows = ''.join([
-		f'''
-		<div>
-			<dt>{row["date"]}</dt><dd>{row["date"]}</dd>
-		</div>
-		'''
-		for row in data
-	])
-
+# <dt>{row["date"]}</dt><dd>{row["date"]}</dd>
+# for row in data
+# <h1>{config["table"]}</h1>
+def table(config, task_config, table_config, data):
+	rows = ''
+	if table_config["row"] == "time":
+		rows = (
+			''.join([
+				f'''
+				<div>
+					<dt>{row['_id']}</dt><dd>{row["s" + task_config["track"]]}</dd>
+				</div>
+				'''
+			for row in data])
+				if (config["aggregation"] == "fiftyStates" or 
+					config["aggregation"] == "usa") else
+			''.join([
+				f'''
+				<div>
+					<dt>{data[0]['dateArray'][i]}</dt><dd>{row}</dd>
+				</div>
+				'''
+			for i, row in enumerate(data[0]['array'])])
+		)
+	else:
+		rows = (
+			''.join([
+				f'''
+				<div>
+					<dt>{row['_id']}</dt><dd>{row["s" + task_config["track"]]}</dd>
+				</div>
+				'''
+			for row in data])
+				if (config["aggregation"] == "fiftyStates" or 
+					config["aggregation"] == "usa") else
+			''.join([
+				f'''
+				<div>
+					<dt>{data[0]['dateArray'][i]}</dt><dd>{row}</dd>
+				</div>
+				'''
+			for i, row in enumerate(data[0]['array'])])
+		)
 	return f'''
-		<h1>{config["table"]}</h1>
+		<h1>{table_config.get("title", "Table")}</h1>
 		<dl>
 			{rows}
 		</dl>
@@ -40,7 +72,7 @@ def single_graph(file_name, graph_config, graph_data, labels):
 
 	plt.savefig(file_name)
 
-	return f'<img src="${file_name}">'
+	return f'<img src="{file_name}.png">'
 
 
 # Produces a graph and outputs it as a picture file in cwd, if applicable
@@ -87,11 +119,18 @@ def graph(config, task_config, graph_config, data):
 
 	else:
 		graph_data.append(
-			[data_point[task_config["track"]] for data_point in query]
-				if has_track else
-			[data_point["the_ratio"] for data_point in query]
-			for query in data
+			[data_point["s" + task_config["track"]] for data_point in data]
+				if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa" else
+			data[0]["array"]
 		)
+		# TODO - consider this
+        #if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa":
+		
+		#[data_point[task_config["track"]] for data_point in query]
+			#	if has_track else
+			#[data_point["the_ratio"] for data_point in query]
+			#for query in data
+		#)
 		labels.append(
 			task_config["track"]
 				if has_track else
@@ -101,23 +140,27 @@ def graph(config, task_config, graph_config, data):
 	# Make graph
 
 	# Construct one graph per <level of aggregation>
-	if graph_config["combo"] == "split":
-		return ''.join([
-			single_graph("graph" + str(i), graph_config, [data], [labels[i]])
-			for i, data in enumerate(graph_data)
-		])
+	if "combo" in graph_config:
+		if graph_config["combo"] == "split":
+			return ''.join([
+				single_graph("graph" + str(i), graph_config, [data], [labels[i]])
+				for i, data in enumerate(graph_data)
+			])
 
-	# Construct one graph per <level of aggregation>
-	elif graph_config["combo"] == "separate":
-		return ''.join([
-			single_graph("graph" + str(i), graph_config, [data], [labels[i]])
-			for i, data in enumerate(graph_data)
-		])
-	
-	# Combine
-	elif graph_config["combo"] == "combine":
+		# Construct one graph per <level of aggregation>
+		elif graph_config["combo"] == "separate":
+			return ''.join([
+				single_graph("graph" + str(i), graph_config, [data], [labels[i]])
+				for i, data in enumerate(graph_data)
+			])
+		
+		# Combine
+		elif graph_config["combo"] == "combine":
+			return single_graph("graph", graph_config, graph_data, labels)
+	else:
 		return single_graph("graph", graph_config, graph_data, labels)
 
+# table(config, analysis["task"], analysis["output"]["table"], data)
 
 # Takes in query result JSON and creates an HTML document
 def results_to_html(config, data):
@@ -125,18 +168,18 @@ def results_to_html(config, data):
 		f'''
 			<section>
 				{
-					graph(config, analysis["task"], analysis["output"]["graph"], data)
+					graph(config, analysis["task"], analysis["output"]["graph"], data[i])
 						if "graph" in analysis["output"] else
 					''
-				}">
+				}
 				{
-					table(config, analysis["task"], analysis["output"]["table"], data)
+					table(config, analysis["task"], analysis["output"]["table"], data[i])
 						if "table" in analysis["output"] else
 					''
 				}
 			</section>
 		'''
-		for analysis in config["analysis"]
+		for i, analysis in enumerate(config["analysis"])
 	])
 
 	css = '''
