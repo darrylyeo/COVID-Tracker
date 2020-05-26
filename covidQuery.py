@@ -11,9 +11,7 @@ from pymongo import MongoClient
 # e.g. April 1, 2020 -> 20200401
 def format_date(date):
 	if type(date) == datetime.date:
-		mon = str(date.month) if len(str(date.month)) == 2 else ('0' + str(date.month))
-		day = str(date.day) if len(str(date.day)) == 2 else ('0' + str(date.day))
-		date = int(str(date.year) + mon + day)
+		date = int('%02d%02d%02d' % (date.year, date.month, date.day))
 	return date
 
 
@@ -288,4 +286,3 @@ def query_task(db, config, task):
 
 	# Construct & return MongoDB query
 	return db[config["collection"]].aggregate(pipeline)
-

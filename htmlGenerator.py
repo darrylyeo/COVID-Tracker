@@ -9,45 +9,26 @@ import matplotlib.pyplot as plt
 # for row in data
 # <h1>{config["table"]}</h1>
 def table(config, task_config, table_config, data):
-	rows = ''
-	if table_config["row"] == "time":
-		rows = (
-			''.join([
-				f'''
-				<div>
-					<dt>{row['_id']}</dt><dd>{row["s" + task_config["track"]]}</dd>
-				</div>
-				'''
-			for row in data])
-				if (config["aggregation"] == "fiftyStates" or 
-					config["aggregation"] == "usa") else
-			''.join([
-				f'''
-				<div>
-					<dt>{data[0]['dateArray'][i]}</dt><dd>{row}</dd>
-				</div>
-				'''
-			for i, row in enumerate(data[0]['array'])])
-		)
-	else:
-		rows = (
-			''.join([
-				f'''
-				<div>
-					<dt>{row['_id']}</dt><dd>{row["s" + task_config["track"]]}</dd>
-				</div>
-				'''
-			for row in data])
-				if (config["aggregation"] == "fiftyStates" or 
-					config["aggregation"] == "usa") else
-			''.join([
-				f'''
-				<div>
-					<dt>{data[0]['dateArray'][i]}</dt><dd>{row}</dd>
-				</div>
-				'''
-			for i, row in enumerate(data[0]['array'])])
-		)
+	rows = (
+		''.join([
+			f'''
+			<div>
+				<dt>{row['_id']}</dt><dd>{row["s" + task_config["track"]]}</dd>
+			</div>
+			'''
+			for row in data
+		])
+			if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa" else
+		''.join([
+			f'''
+			<div>
+				<dt>{data[0]['dateArray'][i]}</dt><dd>{row}</dd>
+			</div>
+			'''
+			for i, row in enumerate(data[0]['array'])
+		])
+	) # if table_config["row"] == "time" else
+
 	return f'''
 		<h1>{table_config.get("title", "Table")}</h1>
 		<dl>
@@ -124,7 +105,7 @@ def graph(config, task_config, graph_config, data):
 			data[0]["array"]
 		)
 		# TODO - consider this
-        #if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa":
+		#if config["aggregation"] == "fiftyStates" or config["aggregation"] == "usa":
 		
 		#[data_point[task_config["track"]] for data_point in query]
 			#	if has_track else
@@ -161,6 +142,7 @@ def graph(config, task_config, graph_config, data):
 		return single_graph("graph", graph_config, graph_data, labels)
 
 # table(config, analysis["task"], analysis["output"]["table"], data)
+
 
 # Takes in query result JSON and creates an HTML document
 def results_to_html(config, data):
