@@ -131,26 +131,26 @@ def query_task(db, config, task):
 				}
 			})
 
-		if config["aggregation"] != "state":
-			print('Target filter:\n',
-			{
-				"$match": {
-					"state": 
-						{ "$in": config["target"] }
-							if type(config["target"]) is list else
-						config["target"]
-				}
-			})	
-		else:
-			print('Target filter:\n',
-			{
-				"$match": {
-					config["aggregation"]: 
-						{ "$in": config["target"] }
-							if type(config["target"]) is list else
-						config["target"]
-				}
-			})
+#		if config["aggregation"] != "state":
+#			print('Target filter:\n',
+#			{
+#				"$match": {
+#					"state": 
+#						{ "$in": config["target"] }
+#							if type(config["target"]) is list else
+#						config["target"]
+#				}
+#			})	
+#		else:
+#			print('Target filter:\n',
+#			{
+#				"$match": {
+#					config["aggregation"]: 
+#						{ "$in": config["target"] }
+#							if type(config["target"]) is list else
+#						config["target"]
+#				}
+#			})
 			
 	
 	# Filter by counties
@@ -164,16 +164,16 @@ def query_task(db, config, task):
 			}
 		})
 
-		print('County filter:\n',
-				{
-				"$match": {
-					config["aggregation"]:
-						{ "$in": config["counties"] }
-							if type(config["counties"]) is list else
-						config["counties"]
-				}
-			}	
-		)
+#		print('County filter:\n',
+#				{
+#				"$match": {
+#					config["aggregation"]:
+#						{ "$in": config["counties"] }
+#							if type(config["counties"]) is list else
+#						config["counties"]
+#				}
+#			}	
+#		)
 	
 # Filter by only states
 	if config["aggregation"] == "fiftyStates":
@@ -183,13 +183,13 @@ def query_task(db, config, task):
 			}
 		})
 
-		print('States filter:\n',
-				{
-				"$match": {
-					"state": { "$nin": ["AS", "GM", "GU", "MH", "FM", "MP", "PW", "PR", "VI"] }
-				}
-			}	
-		)
+#		print('States filter:\n',
+#				{
+#				"$match": {
+#					"state": { "$nin": ["AS", "GM", "GU", "MH", "FM", "MP", "PW", "PR", "VI"] }
+#				}
+#			}	
+#		)
 	
 # Filter by date range
 	if "time" in config:
@@ -211,32 +211,32 @@ def query_task(db, config, task):
 			)
 		} } })
 
-		print('Date filter:\n',
-					{ "$match": { "date": {
-				"$gte": format_date(
-					config["time"]["start"] if "start" in config["time"] else
-					datetime.date(today.year, 1, 1) if config["time"] == "year" else
-					datetime.date(today.year, today.month, 1) if config["time"] == "month" else
-					today - datetime.timedelta(days=today.weekday()) if config["time"] == "week" else
-					0
-				),
-
-				"$lte": format_date(
-					config["time"]["end"] if "end" in config["time"] else
-					today if config["time"] == "year" else
-					today if config["time"] == "month" else
-					today if config["time"] == "week" else
-					30000101
-				)
-			} } }		
-		)
+#		print('Date filter:\n',
+#					{ "$match": { "date": {
+#				"$gte": format_date(
+#					config["time"]["start"] if "start" in config["time"] else
+#					datetime.date(today.year, 1, 1) if config["time"] == "year" else
+#					datetime.date(today.year, today.month, 1) if config["time"] == "month" else
+#					today - datetime.timedelta(days=today.weekday()) if config["time"] == "week" else
+#					0
+#				),
+#
+#				"$lte": format_date(
+#					config["time"]["end"] if "end" in config["time"] else
+#					today if config["time"] == "year" else
+#					today if config["time"] == "month" else
+#					today if config["time"] == "week" else
+#					30000101
+#				)
+#			} } }		
+#		)
 	
 # Project
 	if "stats" not in task:
 		pipeline.append({ "$project": project_stage })
-		print('Project stage:\n',
-						{ "$project": project_stage }		
-		)
+#		print('Project stage:\n',
+#						{ "$project": project_stage }		
+#		)
 	
 	# Sort
 	if config["aggregation"] != "fiftyStates":
@@ -249,19 +249,19 @@ def query_task(db, config, task):
 				{ "date": 1 }
 		})
 
-		print('sort stage:\n',
-			{"$sort":
-				{ "county": 1, "date": 1 }
-					if config["aggregation"] == "county" and type(config["target"]) is list else
-				{ "state": 1, "date": 1 }
-					if config["aggregation"] == "state" and type(config["target"]) is list else
-				{ "date": 1 }
-			}	
-		)
+#		print('sort stage:\n',
+#			{"$sort":
+#				{ "county": 1, "date": 1 }
+#					if config["aggregation"] == "county" and type(config["target"]) is list else
+#				{ "state": 1, "date": 1 }
+#					if config["aggregation"] == "state" and type(config["target"]) is list else
+#				{ "date": 1 }
+#			}	
+#		)
 	
 # Group for analysis
 	pipeline.append({ "$group": group_stage })
-	print('Group stage:\n', { "$group": group_stage })
+#	print('Group stage:\n', { "$group": group_stage })
 
 	# Sort
 	if config["aggregation"] != "fiftyStates":
@@ -274,15 +274,15 @@ def query_task(db, config, task):
 				{ "date": 1 }
 		})
 
-		print('sort stage:\n', {
-			"$sort":
-				{ "county": 1, "date": 1 }
-					if config["aggregation"] == "county" and type(config["target"]) is list else
-				{ "state": 1, "date": 1 }
-					if config["aggregation"] == "state" and type(config["target"]) is list else
-				{ "date": 1 }
-			}
-		)
+#		print('sort stage:\n', {
+#			"$sort":
+#				{ "county": 1, "date": 1 }
+#					if config["aggregation"] == "county" and type(config["target"]) is list else
+#				{ "state": 1, "date": 1 }
+#					if config["aggregation"] == "state" and type(config["target"]) is list else
+#				{ "date": 1 }
+#			}
+#		)
 
 	# Optional? Project step at end for cosmetics
 
