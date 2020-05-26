@@ -175,10 +175,16 @@ def results_to_html(config, data):
 
 		section {
 			padding: 1rem;
+			display: grid;
+			gap: 1em;
 		}
 
 		dl {
 			display: grid;
+		}
+
+		dl > div {
+			display: flex;
 		}
 	'''
 
